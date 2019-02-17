@@ -1,0 +1,6 @@
+*
+!.gitignore
+!drop-mysql-tables.sh
+!wp-cli.yml
+!pull
+!new
