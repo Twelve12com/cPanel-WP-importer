@@ -34,6 +34,8 @@ DB_SUM1=$(md5sum $DB_FILE)
 	cd $SLUG/
 	echo "Checking the latest remote changes..."
 	git pull
+	git reset --hard
+	git pull
 	echo -e "Git pull complete ... ${GREEN}done${RESET}"
 )
 
