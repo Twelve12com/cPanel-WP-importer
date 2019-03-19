@@ -91,7 +91,7 @@ if [[ $DB_SUM1 != $DB_SUM2 ]]; then
 
 	# URL Replacement
 	echo -e "DB url replacement starting..."
-	wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --skip-columns=guid --skip-tables=wp_users --all-tables
+	wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
 	echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
 
 
