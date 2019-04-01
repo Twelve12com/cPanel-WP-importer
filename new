@@ -148,9 +148,23 @@ echo -e "DB info updated ... ${GREEN}done${RESET}"
 
 
 
+# Memory Limit
+echo -e "Memory limit increasing to 512 MB..."
+wp --path=${SLUG}/wp config set WP_MEMORY_LIMIT 512M
+echo -e "Memory limit increased ... ${GREEN}done${RESET}"
+
+
+
+# Uploads location update
+echo -e "Uploads location updating..."
+wp --path=${SLUG}/wp option update upload_path wp-content/uploads
+echo -e "Uploads location updated ... ${GREEN}done${RESET}"
+
+
+
 # URL Replacement
 echo -e "DB url replacement starting..."
-wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --skip-columns=guid --skip-tables=wp_users
+wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
 echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
 
 
