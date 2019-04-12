@@ -1,0 +1,70 @@
+#!/bin/bash
+
+
+# Colors
+GREEN='\033[1;32m' # Green
+BLUE='\033[1;34m' # Blue
+RED='\033[1;31m' # Red
+RESET='\033[0m' # No Color
+
+
+
+# Get Project Name
+read -ep "Project name to push changes (site-name): " SLUG
+[[ -z "$SLUG" ]] && exit || sleep 0
+
+
+if [[ ! -d $SLUG ]]; then
+
+	echo "There is no such project."
+	exit
+
+fi
+
+
+
+# Backup the DB
+echo "Backing up the DB..."
+wp --path=$SLUG/wp db export $SLUG/database/dump/wordpress_data.sql
+
+
+
+
+# Pulling latest changes from git
+(
+	cd $SLUG/
+	echo -e "Open the site directory ... ${GREEN}done${RESET}"
+
+
+	# Stage all the changes
+	echo "Staging all the changes..."
+	git add -A .
+	echo -e "Stage all the changes ... ${GREEN}done${RESET}"
+
+
+	# Show the git status
+	echo "Showing the git status..."
+	git status
+	echo -e "Show the git status ... ${GREEN}done${RESET}"
+
+
+	# Ask for the commit message
+	read -ep "Commit Message: " COMMIT_MESSAGE
+	while [[ -z "$COMMIT_MESSAGE" ]]; do
+
+		read -ep "Commit Message: " COMMIT_MESSAGE
+
+	done
+
+
+	# Commit the changes
+	echo "Committing the changes..."
+	git commit -m "$COMMIT_MESSAGE"
+	echo -e "Commit the changes ... ${GREEN}done${RESET}"
+
+
+	# Push the changes
+	echo "Pushing the changes..."
+	git push
+	echo -e "${GREEN}Git Push Complete${RESET}"
+)
