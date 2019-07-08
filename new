@@ -9,6 +9,10 @@ RED='\033[1;31m' # Red
 RESET='\033[0m' # No Color
 
 
+# Default WP Version
+WP_VERSION=latest
+
+
 
 
 # Get Project Name
@@ -36,45 +40,7 @@ fi
 echo -e "Project '${SLUG}' clonning..."
 if git clone https://twelve12com@bitbucket.org/twelve12com/${SLUG}.git &>/dev/null; then
 
-
 	echo -e "Project '${SLUG}' clonned ... ${GREEN}done${RESET}"
-
-
-	if [[ ! -f $SLUG/wp/wp-config.php ]]; then
-
-
-		echo -e "WP files adding..."
-
-
-		# Download the WP files
-		wp --path=${SLUG}/wp --skip-content core download
-
-
-		echo -e "WP Files added ... ${GREEN}done${RESET}"
-
-	fi
-
-
-
-	# Detect old version
-	if [[ -d ${SLUG}/wp-content ]]; then
-
-
-		echo -e "WP-content folder moving..."
-
-
-		# Remove the old wp-content
-		rm -rf ${SLUG}/wp/wp-content
-
-
-		# Move our wp-content folder
-		mv ${SLUG}/wp-content ${SLUG}/wp/wp-content
-
-
-		echo -e "WP-content folder moved ... ${GREEN}done${RESET}"
-
-	fi
-
 
 else
 
@@ -82,6 +48,7 @@ else
 	exit
 
 fi
+
 
 
 
@@ -112,6 +79,23 @@ fi
 
 # Get the site info
 source ${SLUG}/.env
+
+
+
+# Download the WP
+if [[ ! -f $SLUG/wp/wp-config.php ]]; then
+
+
+	echo -e "WP files adding..."
+
+
+	# Download the WP files
+	wp --path=${SLUG}/wp --version=${WP_VERSION} --skip-content core download
+
+
+	echo -e "WP Files added ... ${GREEN}done${RESET}"
+
+fi
 
 
 
