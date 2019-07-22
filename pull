@@ -33,9 +33,9 @@ DB_SUM1=$(md5sum $DB_FILE)
 (
 	cd $SLUG/
 	echo "Checking the latest remote changes..."
-	git pull
-	git reset --hard
-	git clean -df wp/wp-content/
+	git fetch
+	git reset --hard origin/master
+	git clean -df wp/
 	git pull
 	echo -e "Git pull complete ... ${GREEN}done${RESET}"
 )
