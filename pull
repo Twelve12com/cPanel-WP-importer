@@ -9,9 +9,18 @@ RESET='\033[0m' # No Color
 
 
 
-# Get Project Name
-read -ep "Project name to re-import changes (site-name): " SLUG
-[[ -z "$SLUG" ]] && exit || sleep 0
+if [[ ! -z $1 ]]; then
+
+	SLUG=$1
+
+else
+
+	# Get Project Name
+	read -ep "Project name to re-import changes (site-name): " SLUG
+	[[ -z "$SLUG" ]] && exit || sleep 0
+
+fi
+
 
 
 if [[ ! -d $SLUG ]]; then
