@@ -9,9 +9,18 @@ RESET='\033[0m' # No Color
 
 
 
-# Get Project Name
-read -ep "Project name to push changes (site-name): " SLUG
-[[ -z "$SLUG" ]] && exit || sleep 0
+if [[ ! -z $1 ]]; then
+
+	SLUG=$1
+
+else
+
+	# Get Project Name
+	read -ep "Project name to push changes (site-name): " SLUG
+	[[ -z "$SLUG" ]] && exit || sleep 0
+
+fi
+
 
 
 if [[ ! -d $SLUG ]]; then
@@ -20,6 +29,12 @@ if [[ ! -d $SLUG ]]; then
 	exit
 
 fi
+
+
+
+# Confirmation
+read -ep "Are you sure you want to push the changes from this test server? (Type 'yes' to confirm): " CONFIRMATION
+[[ $CONFIRMATION != 'yes' ]] && exit || sleep 0
 
 
 
