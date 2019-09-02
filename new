@@ -99,20 +99,6 @@ fi
 
 
 
-# Empty the DB
-echo -e "Cleaning the tables..."
-bash drop-mysql-tables.sh ${DBUSER} ${DBPASS} ${DBNAME}
-echo -e "All the tables removed ... ${GREEN}done${RESET}"
-
-
-
-# Import the DB
-echo -e "DB importing..."
-mysql --silent --user=${DBUSER} ${DBNAME} < ${SLUG}/database/dump/wordpress_data.sql
-echo -e "DB imported ... ${GREEN}done${RESET}"
-
-
-
 # Update the DB info
 echo -e "DB info updating..."
 if [[ -f ${SLUG}/wp/wp-config.php ]]; then
@@ -129,6 +115,20 @@ else
 
 fi
 echo -e "DB info updated ... ${GREEN}done${RESET}"
+
+
+
+# Empty the DB
+echo -e "Cleaning the tables..."
+wp --path=${SLUG}/wp db reset --yes
+echo -e "All the tables removed ... ${GREEN}done${RESET}"
+
+
+
+# Import the DB
+echo -e "DB importing..."
+wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
+echo -e "DB imported ... ${GREEN}done${RESET}"
 
 
 
