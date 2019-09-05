@@ -77,8 +77,19 @@ fi
 
 # ACTION:
 
-# Get the site info
-source ${SLUG}/.env
+# Get environmental data
+if [[ -f $SLUG/local.env ]]; then
+
+	source $SLUG/local.env
+
+fi
+
+
+if [[ -f $SLUG/.env ]]; then
+
+	source $SLUG/.env
+
+fi
 
 
 

@@ -53,7 +53,18 @@ DB_SUM1=$(md5sum $DB_FILE)
 
 
 # Get environmental data
-source $SLUG/.env
+if [[ -f $SLUG/local.env ]]; then
+
+	source $SLUG/local.env
+
+fi
+
+
+if [[ -f $SLUG/.env ]]; then
+
+	source $SLUG/.env
+
+fi
 
 
 
