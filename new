@@ -97,35 +97,30 @@ fi
 if [[ ! -f $SLUG/wp/wp-config.php ]]; then
 
 
-	echo -e "WP files adding..."
-
-
 	# Download the WP files
+	echo -e "WP files adding..."
 	wp --path=${SLUG}/wp --version=${WP_VERSION} --skip-content core download
-
-
 	echo -e "WP Files added ... ${GREEN}done${RESET}"
 
-fi
+
+	# Create the config file
+	echo -e "DB info updating..."
+	wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost
+	echo -e "DB info updated ... ${GREEN}done${RESET}"
 
 
+else
 
-# Update the DB info
-echo -e "DB info updating..."
-if [[ -f ${SLUG}/wp/wp-config.php ]]; then
 
+	echo -e "DB info updating..."
 	wp --path=${SLUG}/wp config set DB_NAME $DBNAME
 	wp --path=${SLUG}/wp config set DB_USER $DBUSER
 	wp --path=${SLUG}/wp config set DB_PASSWORD $DBPASS
 	wp --path=${SLUG}/wp config set DB_HOST localhost
+	echo -e "DB info updated ... ${GREEN}done${RESET}"
 
-else
-
-	# Create the config file
-	wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost
 
 fi
-echo -e "DB info updated ... ${GREEN}done${RESET}"
 
 
 
