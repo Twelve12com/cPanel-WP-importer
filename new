@@ -23,13 +23,11 @@ read -ep "Please enter which project would you like to add from BitBucket (site-
 if [[ -d $SLUG ]]; then
 
 	read -ep "This project is already exist. Would you like to remove it and reinstall? (Type 'yes' or 'y' to confirm): " override
-	if [[ $override != "yes" ]] && [[ $override != "y" ]]; then
+	if [[ $override == "yes" ]] || [[ $override == "y" ]]; then
 
-		exit
+		rm -rf $SLUG
 
-	fi
-
-	rm -rf $SLUG
+	fi	
 
 fi
 
@@ -37,15 +35,21 @@ fi
 
 
 # TEST THE GIT REPO
-echo -e "Project '${SLUG}' clonning..."
-if git clone https://twelve12com@bitbucket.org/twelve12com/${SLUG}.git &>/dev/null; then
+if [[ $override == "yes" ]] || [[ $override == "y" ]] || [[ -z $override ]]; then
 
-	echo -e "Project '${SLUG}' clonned ... ${GREEN}done${RESET}"
 
-else
+	echo -e "Project '${SLUG}' clonning..."
+	if git clone https://twelve12com@bitbucket.org/twelve12com/${SLUG}.git &>/dev/null; then
 
-	echo -e "${RED}Remote repository not found.${RESET}"
-	exit
+		echo -e "Project '${SLUG}' clonned ... ${GREEN}done${RESET}"
+
+	else
+
+		echo -e "${RED}Remote repository not found.${RESET}"
+		exit
+
+	fi
+
 
 fi
 
@@ -66,10 +70,25 @@ export MYSQL_PWD=$DBPASS
 
 # TEST THE DB
 RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
-if [ "$RESULT" != ${DBNAME} ]; then
+while [ "$RESULT" != ${DBNAME} ]; do
+
+
     echo -e "${RED}Wrong DB info.${RESET}"
-    exit
-fi
+
+	# Ask for the DB info
+	read -ep "DB Name: " DBNAME
+	[[ -z $DBNAME ]] && exit || sleep 0
+
+	read -ep "DB User: " DBUSER
+	[[ -z $DBUSER ]] && exit || sleep 0
+
+	read -ep "DB Password: " DBPASS
+	[[ -z $DBUSER ]] && exit || sleep 0
+
+	export MYSQL_PWD=$DBPASS
+
+
+done
 
 
 
