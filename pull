@@ -97,34 +97,34 @@ if [[ $DB_SUM1 != $DB_SUM2 ]]; then
 
 	# Empty the DB
 	echo -e "Cleaning the tables..."
-	wp --path=${SLUG}/wp --skip-plugins --skip-themes --skip-packages db reset --yes
+	wp --path=${SLUG}/wp --skip-plugins db reset --yes
 	echo -e "All the tables removed ... ${GREEN}done${RESET}"
 
 
 
 	# Import the new DB
 	echo -e "DB importing..."
-	wp --path=${SLUG}/wp --skip-plugins --skip-themes --skip-packages db import "${SLUG}/database/dump/wordpress_data.sql"
+	wp --path=${SLUG}/wp --skip-plugins db import "${SLUG}/database/dump/wordpress_data.sql"
 	echo -e "DB imported ... ${GREEN}done${RESET}"
 
 
 
 	# Uploads location update
 	echo -e "Uploads location updating..."
-	wp --path=${SLUG}/wp --skip-plugins --skip-themes --skip-packages option update upload_path wp-content/uploads
+	wp --path=${SLUG}/wp --skip-plugins option update upload_path wp-content/uploads
 	echo -e "Uploads location updated ... ${GREEN}done${RESET}"
 
 
 
 	# URL Replacement
 	echo -e "DB url replacement starting..."
-	wp --path=${SLUG}/wp --skip-plugins --skip-themes --skip-packages search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
+	wp --path=${SLUG}/wp --skip-plugins search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
 	echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
 
 
 
 	# Rewrite Flush
-	wp --path=${SLUG}/wp --skip-plugins --skip-themes --skip-packages rewrite flush --hard
+	wp --path=${SLUG}/wp --skip-plugins rewrite flush --hard
 
 
 
