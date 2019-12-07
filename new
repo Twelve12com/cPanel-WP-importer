@@ -118,13 +118,13 @@ if [[ ! -f $SLUG/wp/wp-config.php ]]; then
 
 	# Download the WP files
 	echo -e "WP files adding..."
-	wp --path=${SLUG}/wp --skip-plugins core download --version=${WP_VERSION} --skip-content --force
+	wp --path=${SLUG}/wp core download --version=${WP_VERSION} --skip-content --force
 	echo -e "WP Files added ... ${GREEN}done${RESET}"
 
 
 	# Create the config file
 	echo -e "DB info updating..."
-	wp --path=${SLUG}/wp --skip-plugins config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --force
+	wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --force
 	echo -e "DB info updated ... ${GREEN}done${RESET}"
 
 
@@ -134,41 +134,41 @@ fi
 
 # Empty the DB
 echo -e "Cleaning the tables..."
-wp --path=${SLUG}/wp --skip-plugins db reset --yes
+wp --path=${SLUG}/wp db reset --yes
 echo -e "All the tables removed ... ${GREEN}done${RESET}"
 
 
 
 # Import the DB
 echo -e "DB importing..."
-wp --path=${SLUG}/wp --skip-plugins db import "${SLUG}/database/dump/wordpress_data.sql"
+wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
 echo -e "DB imported ... ${GREEN}done${RESET}"
 
 
 
 # Memory Limit
 echo -e "Memory limit increasing to 512 MB..."
-wp --path=${SLUG}/wp --skip-plugins config set WP_MEMORY_LIMIT 512M
+wp --path=${SLUG}/wp config set WP_MEMORY_LIMIT 512M
 echo -e "Memory limit increased ... ${GREEN}done${RESET}"
 
 
 
 # Uploads location update
 echo -e "Uploads location updating..."
-wp --path=${SLUG}/wp --skip-plugins option update upload_path wp-content/uploads
+wp --path=${SLUG}/wp option update upload_path wp-content/uploads
 echo -e "Uploads location updated ... ${GREEN}done${RESET}"
 
 
 
 # URL Replacement
 echo -e "DB url replacement starting..."
-wp --path=${SLUG}/wp --skip-plugins search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
+wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
 echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
 
 
 
 # Rewrite Flush
-wp --path=${SLUG}/wp --skip-plugins rewrite flush --hard
+wp --path=${SLUG}/wp rewrite flush --hard
 
 
 
