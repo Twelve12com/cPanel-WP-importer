@@ -79,8 +79,8 @@ export MYSQL_PWD=$DBPASS
 # TEST THE DB
 RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
 if [ "$RESULT" != ${DBNAME} ]; then
-    echo -e "${RED}Cannot connect to the DB.${RESET}"
-    exit
+	echo -e "${RED}Cannot connect to the DB.${RESET}"
+	exit
 fi
 
 

@@ -27,7 +27,7 @@ if [[ -d $SLUG ]]; then
 
 		rm -rf $SLUG
 
-	fi	
+	fi
 
 fi
 
@@ -73,7 +73,7 @@ RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAM
 while [ "$RESULT" != ${DBNAME} ]; do
 
 
-    echo -e "${RED}Wrong DB info.${RESET}"
+	echo -e "${RED}Wrong DB info.${RESET}"
 
 	# Ask for the DB info
 	read -ep "DB Name: " DBNAME
