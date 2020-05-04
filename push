@@ -23,6 +23,7 @@ fi
 
 
 
+
 if [[ ! -d $SLUG ]]; then
 
 	echo "There is no such project."
@@ -32,15 +33,25 @@ fi
 
 
 
+
 # Confirmation
 read -ep "Are you sure you want to push the changes from this test server? (Type 'yes' to confirm): " CONFIRMATION
 [[ $CONFIRMATION != 'yes' ]] && exit || sleep 0
 
 
 
-# Backup the DB
-echo "Backing up the DB..."
-wp --path=$SLUG/wp db export $SLUG/database/dump/wordpress_data.sql
+
+# If WP repo
+DB_FILE=$SLUG/database/dump/wordpress_data.sql
+if [[ -f $DB_FILE ]]; then
+
+
+	# Backup the DB
+	echo "Backing up the DB..."
+	wp --path=$SLUG/wp db export "${DB_FILE}"
+
+
+fi
 
 
 

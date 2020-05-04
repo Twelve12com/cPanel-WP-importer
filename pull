@@ -23,6 +23,7 @@ fi
 
 
 
+
 if [[ ! -d $SLUG ]]; then
 
 	echo "There is no such project."
@@ -33,13 +34,8 @@ fi
 
 
 
-# DB file
-DB_FILE=$SLUG/database/dump/wordpress_data.sql
-
-
-
-
 # If WP repo
+DB_FILE=$SLUG/database/dump/wordpress_data.sql
 if [[ -f $DB_FILE ]]; then
 
 
