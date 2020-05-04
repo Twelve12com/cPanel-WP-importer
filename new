@@ -35,6 +35,7 @@ if [[ -d $SLUG ]]; then
 	if [[ $override == "yes" ]] || [[ $override == "y" ]]; then
 
 		rm -rf $SLUG
+		echo "Existing folder removed"
 
 	fi
 
