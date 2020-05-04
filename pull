@@ -32,9 +32,23 @@ fi
 
 
 
-# DETECT DB CHANGES
+
+# DB file
 DB_FILE=$SLUG/database/dump/wordpress_data.sql
-DB_SUM1=$(md5sum $DB_FILE)
+
+
+
+
+# If WP repo
+if [[ -f $DB_FILE ]]; then
+
+
+	# DETECT DB CHANGES
+	DB_SUM1=$(md5sum $DB_FILE)
+
+
+fi
+
 
 
 
@@ -52,100 +66,106 @@ DB_SUM1=$(md5sum $DB_FILE)
 
 
 
-# Get environmental data
-if [[ -f $SLUG/local.env ]]; then
+# If WP repo
+if [[ -f $DB_FILE ]]; then
 
-	source $SLUG/local.env
+
+	# Get environmental data
+	if [[ -f $SLUG/local.env ]]; then
+
+		source $SLUG/local.env
+
+	fi
+
+
+	if [[ -f $SLUG/.env ]]; then
+
+		source $SLUG/.env
+
+	fi
+
+
+
+	# Get current DB info
+	DBNAME=$(wp --path=$SLUG/wp config get DB_NAME)
+	DBUSER=$(wp --path=$SLUG/wp config get DB_USER)
+	DBPASS=$(wp --path=$SLUG/wp config get DB_PASSWORD)
+	export MYSQL_PWD=$DBPASS
+
+
+	# TEST THE DB
+	RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
+	if [ "$RESULT" != ${DBNAME} ]; then
+		echo -e "${RED}Cannot connect to the DB.${RESET}"
+		exit
+	fi
+
+
+
+	# DETECT DB CHANGES
+	DB_SUM2=$(md5sum $DB_FILE)
+	if [[ $DB_SUM1 != $DB_SUM2 ]]; then
+
+
+
+		echo "DB changed."
+
+
+
+		# Empty the DB
+		echo -e "Cleaning the tables..."
+		wp --path=${SLUG}/wp db reset --yes
+		echo -e "All the tables removed ... ${GREEN}done${RESET}"
+
+
+
+		# Import the new DB
+		echo -e "DB importing..."
+		wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
+		echo -e "DB imported ... ${GREEN}done${RESET}"
+
+
+
+		# Uploads location update
+		echo -e "Uploads location updating..."
+		wp --path=${SLUG}/wp option update upload_path wp-content/uploads
+		echo -e "Uploads location updated ... ${GREEN}done${RESET}"
+
+
+
+		# URL Replacement
+		echo -e "DB url replacement starting..."
+		wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
+		echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
+
+
+
+		# Rewrite Flush
+		wp --path=${SLUG}/wp rewrite flush --hard
+
+
+
+	else
+
+
+		echo "DB is identical."
+
+
+	fi
+
+
+
+
+	# PRINT THE SITE INFO
+	echo ""
+	echo ""
+	echo -e "== ${GREEN}Site Re-import Complete${RESET} ===================="
+	echo ""
+	echo "Live URL: http://${PREFIX}.twelve12.co"
+	echo ""
+	echo "================================="
+	echo ""
+	echo ""
+
 
 fi
-
-
-if [[ -f $SLUG/.env ]]; then
-
-	source $SLUG/.env
-
-fi
-
-
-
-# Get current DB info
-DBNAME=$(wp --path=$SLUG/wp config get DB_NAME)
-DBUSER=$(wp --path=$SLUG/wp config get DB_USER)
-DBPASS=$(wp --path=$SLUG/wp config get DB_PASSWORD)
-
-export MYSQL_PWD=$DBPASS
-
-
-# TEST THE DB
-RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
-if [ "$RESULT" != ${DBNAME} ]; then
-	echo -e "${RED}Cannot connect to the DB.${RESET}"
-	exit
-fi
-
-
-
-# DETECT DB CHANGES
-DB_SUM2=$(md5sum $DB_FILE)
-if [[ $DB_SUM1 != $DB_SUM2 ]]; then
-
-
-
-	echo "DB changed."
-
-
-
-	# Empty the DB
-	echo -e "Cleaning the tables..."
-	wp --path=${SLUG}/wp db reset --yes
-	echo -e "All the tables removed ... ${GREEN}done${RESET}"
-
-
-
-	# Import the new DB
-	echo -e "DB importing..."
-	wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
-	echo -e "DB imported ... ${GREEN}done${RESET}"
-
-
-
-	# Uploads location update
-	echo -e "Uploads location updating..."
-	wp --path=${SLUG}/wp option update upload_path wp-content/uploads
-	echo -e "Uploads location updated ... ${GREEN}done${RESET}"
-
-
-
-	# URL Replacement
-	echo -e "DB url replacement starting..."
-	wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
-	echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
-
-
-
-	# Rewrite Flush
-	wp --path=${SLUG}/wp rewrite flush --hard
-
-
-
-else
-
-
-	echo "DB is identical."
-
-
-fi
-
-
-
-
-# PRINT THE SITE INFO
-echo ""
-echo ""
-echo -e "== ${GREEN}Site Re-import Complete${RESET} ===================="
-echo ""
-echo "Live URL: http://${PREFIX}.twelve12.co"
-echo ""
-echo "================================="
-echo ""
-echo ""
