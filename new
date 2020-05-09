@@ -14,10 +14,19 @@ WP_VERSION=latest
 
 
 
+if [[ ! -z $1 ]]; then
 
-# Get Project Name
-read -ep "Please enter which project would you like to add from GitHub (site-name): " SLUG
-[[ -z "$SLUG" ]] && exit || sleep 0
+	SLUG=$1
+
+else
+
+	# Get Project Name
+	read -ep "Please enter which project would you like to add from GitHub (site-name): " SLUG
+	[[ -z "$SLUG" ]] && exit || sleep 0
+
+fi
+
+
 
 
 if [[ -d $SLUG ]]; then
@@ -26,8 +35,9 @@ if [[ -d $SLUG ]]; then
 	if [[ $override == "yes" ]] || [[ $override == "y" ]]; then
 
 		rm -rf $SLUG
+		echo "Existing folder removed"
 
-	fi	
+	fi
 
 fi
 
@@ -56,24 +66,10 @@ fi
 
 
 
-# Ask for the DB info
-read -ep "DB Name: " DBNAME
-[[ -z $DBNAME ]] && exit || sleep 0
+# If WP repo
+DB_FILE=$SLUG/database/dump/wordpress_data.sql
+if [[ -f $DB_FILE ]]; then
 
-read -ep "DB User: " DBUSER
-[[ -z $DBUSER ]] && exit || sleep 0
-
-read -ep "DB Password: " DBPASS
-[[ -z $DBUSER ]] && exit || sleep 0
-
-export MYSQL_PWD=$DBPASS
-
-# TEST THE DB
-RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
-while [ "$RESULT" != ${DBNAME} ]; do
-
-
-    echo -e "${RED}Wrong DB info.${RESET}"
 
 	# Ask for the DB info
 	read -ep "DB Name: " DBNAME
@@ -87,101 +83,123 @@ while [ "$RESULT" != ${DBNAME} ]; do
 
 	export MYSQL_PWD=$DBPASS
 
-
-done
-
-
-
+	# TEST THE DB
+	RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
+	while [ "$RESULT" != ${DBNAME} ]; do
 
 
-# ACTION:
+		echo -e "${RED}Wrong DB info.${RESET}"
 
-# Get environmental data
-if [[ -f $SLUG/local.env ]]; then
+		# Ask for the DB info
+		read -ep "DB Name: " DBNAME
+		[[ -z $DBNAME ]] && exit || sleep 0
 
-	source $SLUG/local.env
+		read -ep "DB User: " DBUSER
+		[[ -z $DBUSER ]] && exit || sleep 0
+
+		read -ep "DB Password: " DBPASS
+		[[ -z $DBUSER ]] && exit || sleep 0
+
+		export MYSQL_PWD=$DBPASS
+
+
+	done
+
+
+
+
+
+	# ACTION:
+
+	# Get environmental data
+	if [[ -f $SLUG/local.env ]]; then
+
+		source $SLUG/local.env
+
+	fi
+
+
+	if [[ -f $SLUG/.env ]]; then
+
+		source $SLUG/.env
+
+	fi
+
+
+
+	# Download the WP
+	if [[ ! -f $SLUG/wp/wp-config.php ]]; then
+
+
+		# Download the WP files
+		echo -e "WP files adding..."
+		wp --path=${SLUG}/wp core download --version=${WP_VERSION} --skip-content --force
+		echo -e "WP Files added ... ${GREEN}done${RESET}"
+
+
+		# Create the config file
+		echo -e "DB info updating..."
+		wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --force
+		echo -e "DB info updated ... ${GREEN}done${RESET}"
+
+
+	fi
+
+
+
+	# Empty the DB
+	echo -e "Cleaning the tables..."
+	wp --path=${SLUG}/wp db reset --yes
+	echo -e "All the tables removed ... ${GREEN}done${RESET}"
+
+
+
+	# Import the DB
+	echo -e "DB importing..."
+	wp --path=${SLUG}/wp db import "${DB_FILE}"
+	echo -e "DB imported ... ${GREEN}done${RESET}"
+
+
+
+	# Memory Limit
+	echo -e "Memory limit increasing to 512 MB..."
+	wp --path=${SLUG}/wp config set WP_MEMORY_LIMIT 512M
+	echo -e "Memory limit increased ... ${GREEN}done${RESET}"
+
+
+
+	# Uploads location update
+	echo -e "Uploads location updating..."
+	wp --path=${SLUG}/wp option update upload_path wp-content/uploads
+	echo -e "Uploads location updated ... ${GREEN}done${RESET}"
+
+
+
+	# URL Replacement
+	echo -e "DB url replacement starting..."
+	wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
+	echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
+
+
+
+	# Rewrite Flush
+	wp --path=${SLUG}/wp rewrite flush --hard
+
+
+
+
+	# PRINT THE SITE INFO
+	echo ""
+	echo ""
+	echo -e "== ${GREEN}Site Import Complete${RESET} ===================="
+	echo ""
+	echo -e "${BLUE}IMPORTANT:${RESET} Now, create a subdomain named '${BLUE}${PREFIX}${RESET}' for the '${BLUE}public_html/${SLUG}/wp${RESET}' folder. Then, the URL below will be working."
+	echo ""
+	echo "Live URL will be: http://${PREFIX}.twelve12.co"
+	echo ""
+	echo "================================="
+	echo ""
+	echo ""
+
 
 fi
-
-
-if [[ -f $SLUG/.env ]]; then
-
-	source $SLUG/.env
-
-fi
-
-
-
-# Download the WP
-if [[ ! -f $SLUG/wp/wp-config.php ]]; then
-
-
-	# Download the WP files
-	echo -e "WP files adding..."
-	wp --path=${SLUG}/wp core download --version=${WP_VERSION} --skip-content --force
-	echo -e "WP Files added ... ${GREEN}done${RESET}"
-
-
-	# Create the config file
-	echo -e "DB info updating..."
-	wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --force
-	echo -e "DB info updated ... ${GREEN}done${RESET}"
-
-
-fi
-
-
-
-# Empty the DB
-echo -e "Cleaning the tables..."
-wp --path=${SLUG}/wp db reset --yes
-echo -e "All the tables removed ... ${GREEN}done${RESET}"
-
-
-
-# Import the DB
-echo -e "DB importing..."
-wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
-echo -e "DB imported ... ${GREEN}done${RESET}"
-
-
-
-# Memory Limit
-echo -e "Memory limit increasing to 512 MB..."
-wp --path=${SLUG}/wp config set WP_MEMORY_LIMIT 512M
-echo -e "Memory limit increased ... ${GREEN}done${RESET}"
-
-
-
-# Uploads location update
-echo -e "Uploads location updating..."
-wp --path=${SLUG}/wp option update upload_path wp-content/uploads
-echo -e "Uploads location updated ... ${GREEN}done${RESET}"
-
-
-
-# URL Replacement
-echo -e "DB url replacement starting..."
-wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
-echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
-
-
-
-# Rewrite Flush
-wp --path=${SLUG}/wp rewrite flush --hard
-
-
-
-
-# PRINT THE SITE INFO
-echo ""
-echo ""
-echo -e "== ${GREEN}Site Import Complete${RESET} ===================="
-echo ""
-echo -e "${BLUE}IMPORTANT:${RESET} Now, create a subdomain named '${BLUE}${PREFIX}${RESET}' for the '${BLUE}public_html/${SLUG}/wp${RESET}' folder. Then, the URL below will be working."
-echo ""
-echo "Live URL will be: http://${PREFIX}.twelve12.co"
-echo ""
-echo "================================="
-echo ""
-echo ""
