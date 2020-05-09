@@ -16,7 +16,7 @@ WP_VERSION=latest
 
 
 # Get Project Name
-read -ep "Please enter which project would you like to add from BitBucket (site-name): " SLUG
+read -ep "Please enter which project would you like to add from GitHub (site-name): " SLUG
 [[ -z "$SLUG" ]] && exit || sleep 0
 
 
@@ -39,7 +39,7 @@ if [[ $override == "yes" ]] || [[ $override == "y" ]] || [[ -z $override ]]; the
 
 
 	echo -e "Project '${SLUG}' clonning..."
-	if git clone https://twelve12com@bitbucket.org/twelve12com/${SLUG}.git &>/dev/null; then
+	if git clone https://github.com/Twelve12com/${SLUG}.git &>/dev/null; then
 
 		echo -e "Project '${SLUG}' clonned ... ${GREEN}done${RESET}"
 
