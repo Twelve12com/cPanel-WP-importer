@@ -49,7 +49,7 @@ if [[ $override == "yes" ]] || [[ $override == "y" ]] || [[ -z $override ]]; the
 
 
 	echo -e "Project '${SLUG}' clonning..."
-	if git clone https://github.com/Twelve12com/${SLUG}.git &>/dev/null; then
+	if git clone https://github.com/twelve12/${SLUG}.git &>/dev/null; then
 
 		echo -e "Project '${SLUG}' clonned ... ${GREEN}done${RESET}"
 
