@@ -2,5 +2,6 @@
 !.gitignore
 !wp-cli.yml
 !pull
+!reset
 !push
 !new

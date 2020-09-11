@@ -1,0 +1,144 @@
+#!/bin/bash
+
+
+# Colors
+GREEN='\033[1;32m' # Green
+BLUE='\033[1;34m' # Blue
+RED='\033[1;31m' # Red
+RESET='\033[0m' # No Color
+
+
+
+if [[ ! -z $1 ]]; then
+
+	SLUG=$1
+
+else
+
+	# Get Project Name
+	read -ep "Project name to reset changes (site-name): " SLUG
+	[[ -z "$SLUG" ]] && exit || sleep 0
+
+fi
+
+
+
+
+if [[ ! -d $SLUG ]]; then
+
+	echo "There is no such project."
+	exit
+
+fi
+
+
+
+
+# Confirmation
+read -ep "Are you sure you want to hard reset? (Type 'yes'): " CONFIRMATION
+[[ $CONFIRMATION != "yes" ]] && exit || sleep 0
+
+
+
+
+# Pulling latest changes from git
+(
+	cd $SLUG/
+	echo "Checking the latest remote changes..."
+	git fetch
+	git reset --hard origin/master
+	git clean -df
+	git pull
+	echo -e "Git pull complete ... ${GREEN}done${RESET}"
+)
+
+
+
+
+# If WP repo
+if [[ -f $SLUG/database/dump/wordpress_data.sql ]]; then
+
+
+	# Get environmental data
+	if [[ -f $SLUG/local.env ]]; then
+
+		source $SLUG/local.env
+
+	fi
+
+
+	if [[ -f $SLUG/.env ]]; then
+
+		source $SLUG/.env
+
+	fi
+
+
+
+	# Get current DB info
+	DBNAME=$(wp --path=$SLUG/wp config get DB_NAME)
+	DBUSER=$(wp --path=$SLUG/wp config get DB_USER)
+	DBPASS=$(wp --path=$SLUG/wp config get DB_PASSWORD)
+	export MYSQL_PWD=$DBPASS
+
+
+	# TEST THE DB
+	RESULT=`mysqlshow --user=${DBUSER} ${DBNAME}| grep -v Wildcard | grep -o ${DBNAME}`
+	if [ "$RESULT" != ${DBNAME} ]; then
+		echo -e "${RED}Cannot connect to the DB.${RESET}"
+		exit
+	fi
+
+
+
+	echo "DB Resetting..."
+
+
+
+	# Empty the DB
+	echo -e "Cleaning the tables..."
+	wp --path=${SLUG}/wp db reset --yes
+	echo -e "All the tables removed ... ${GREEN}done${RESET}"
+
+
+
+	# Import the new DB
+	echo -e "DB importing..."
+	wp --path=${SLUG}/wp db import "${SLUG}/database/dump/wordpress_data.sql"
+	echo -e "DB imported ... ${GREEN}done${RESET}"
+
+
+
+	# Uploads location update
+	echo -e "Uploads location updating..."
+	wp --path=${SLUG}/wp option update upload_path wp-content/uploads
+	echo -e "Uploads location updated ... ${GREEN}done${RESET}"
+
+
+
+	# URL Replacement
+	echo -e "DB url replacement starting..."
+	wp --path=${SLUG}/wp search-replace "${DOMAIN}" "${PREFIX}.twelve12.co" --recurse-objects --report-changed-only --all-tables
+	echo -e "DB url replacement finished ... ${GREEN}done${RESET}"
+
+
+
+	# Rewrite Flush
+	wp --path=${SLUG}/wp rewrite flush --hard
+
+
+
+
+	# PRINT THE SITE INFO
+	echo ""
+	echo ""
+	echo -e "== ${GREEN}Site Re-import Complete${RESET} ===================="
+	echo ""
+	echo "Live URL: http://${PREFIX}.twelve12.co"
+	echo ""
+	echo "================================="
+	echo ""
+	echo ""
+
+
+fi
