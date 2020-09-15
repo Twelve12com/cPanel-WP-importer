@@ -139,7 +139,7 @@ if [[ -f $DB_FILE ]]; then
 
 		# Create the config file
 		echo -e "DB info updating..."
-		wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --force
+		wp --path=${SLUG}/wp config create --dbname=$DBNAME --dbuser=$DBUSER --dbpass=$DBPASS --dbhost=localhost --dbprefix=$DB_PREFIX --force
 		echo -e "DB info updated ... ${GREEN}done${RESET}"
 
 
