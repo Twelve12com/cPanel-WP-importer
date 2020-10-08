@@ -161,6 +161,13 @@ if [[ -f $DB_FILE ]]; then
 
 
 
+	# Disable Debug
+	echo -e "Disabling WP_DEBUG..."
+	wp --path=${SLUG}/wp config set WP_DEBUG true --raw
+	echo -e "WP_DEBUG disabled ... ${GREEN}done${RESET}"
+
+
+
 	# Memory Limit
 	echo -e "Memory limit increasing to 512 MB..."
 	wp --path=${SLUG}/wp config set WP_MEMORY_LIMIT 512M
