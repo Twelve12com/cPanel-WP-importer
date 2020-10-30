@@ -53,7 +53,7 @@ fi
 	cd $SLUG/
 	echo "Checking the latest remote changes..."
 	git fetch
-	git reset --hard origin/master
+	git reset --hard
 	git clean -df
 	git pull
 	echo -e "Git pull complete ... ${GREEN}done${RESET}"
